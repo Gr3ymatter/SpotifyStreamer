@@ -13,7 +13,6 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import kaaes.spotify.webapi.android.SpotifyApi;
@@ -35,7 +34,7 @@ public class MainActivityFragment extends Fragment {
 
     AsyncTask fetchArtistData;
 
-    static ArrayAdapter<String> artistAdapter;
+    static ArrayAdapter<Artist> artistAdapter;
 
     public MainActivityFragment() {
     }
@@ -45,10 +44,7 @@ public class MainActivityFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
-        artistAdapter = new ArrayAdapter<String>(this.getActivity(),
-                R.layout.list_item_artist,
-                R.id.list_item_artist_textview,
-                new ArrayList<String>());
+        artistAdapter = new ArtistListAdapter(getActivity(), R.layout.list_item_artist);
 
         mSearchEditText = (EditText)rootView.findViewById(R.id.editText_search);
         mArtistListView = (ListView)rootView.findViewById(R.id.listview_artist);
@@ -96,6 +92,8 @@ public class MainActivityFragment extends Fragment {
 
     }
 
+
+
     private class  FetchArtistData extends AsyncTask<String, Void, List>{
 
         List<Artist> artistList;
@@ -123,15 +121,7 @@ public class MainActivityFragment extends Fragment {
             else
             {
                 artistAdapter.clear();
-
-                ArrayList<String> artistNames = new ArrayList<String>();
-
-                for (Artist artist : artistList)
-                {
-                    artistNames.add(artist.name);
-                }
-
-                artistAdapter.addAll(artistNames);
+                artistAdapter.addAll(artistList);
                 artistAdapter.setNotifyOnChange(true);
             }
 
