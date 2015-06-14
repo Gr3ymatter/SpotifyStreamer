@@ -32,7 +32,7 @@ public class ArtistListAdapter extends ArrayAdapter<Artist> {
 
     //Instead of doing it this way, should i be using Volley? NetworkImageView's etc?
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(int position, View convertView,  ViewGroup parent) {
 
         View rowView = convertView;
 

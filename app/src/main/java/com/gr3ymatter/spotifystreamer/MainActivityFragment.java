@@ -1,5 +1,6 @@
 package com.gr3ymatter.spotifystreamer;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -9,6 +10,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -29,14 +31,14 @@ public class MainActivityFragment extends Fragment {
     EditText mSearchEditText;
     ListView mArtistListView;
     ViewSwitcher mViewSwitcher;
+    AsyncTask fetchArtistData;
+    static ArrayAdapter<Artist> artistAdapter;
+    public static final String ARTIST_ID = "artist_id";
+    public static final String ARTIST_NAME = "artist_name";
 
     static SpotifyApi mspotifyApi;
 
     long lastTimeTyped;
-
-    AsyncTask fetchArtistData;
-
-    static ArrayAdapter<Artist> artistAdapter;
 
     public MainActivityFragment() {
     }
@@ -77,10 +79,24 @@ public class MainActivityFragment extends Fragment {
             }
         });
 
+
+        mArtistListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String artistId = ((Artist)parent.getItemAtPosition(position)).id;
+                String artistName = ((Artist)parent.getItemAtPosition(position)).name;
+                Intent idIntent = new Intent(getActivity(), ArtistTrackActivity.class);
+                idIntent.putExtra(ARTIST_ID, artistId);
+                idIntent.putExtra(ARTIST_NAME, artistName);
+                startActivity(idIntent);
+            }
+        });
         return rootView;
     }
 
 
+    //This method cancels my old search. However the way i am doing it is questionable.
+    //Am i creating a memoryleak by losing reference to the old AsyncTask??
     private void refreshSearch(String name){
 
         if(fetchArtistData == null){
@@ -107,7 +123,6 @@ public class MainActivityFragment extends Fragment {
         protected List doInBackground(String... params) {
             mspotifyApi = new SpotifyApi();
             SpotifyService spotify = mspotifyApi.getService();
-
             artistList = spotify.searchArtists(params[0]).artists.items;
 
             return artistList;
@@ -124,10 +139,12 @@ public class MainActivityFragment extends Fragment {
             }
             else
             {
+                //If the current view is not the ArtistListView then display the ArtistListView
+                //as we have artists to display
                 if(!mViewSwitcher.getCurrentView().equals(mArtistListView))
                     mViewSwitcher.showNext();;
-                artistAdapter.clear();
-                artistAdapter.addAll(artistList);
+                artistAdapter.clear();                      //Clear the list
+                artistAdapter.addAll(artistList);           //Add Artists together. Its better to add them all together than one by one
                 artistAdapter.setNotifyOnChange(true);
             }
         }

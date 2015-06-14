@@ -4,6 +4,12 @@
     <string name="action_settings">Settings</string>
 
     <string name="artist_search_hint">Enter Artist Name</string>
-    <string name="no_results_textview">No Such Artist Found.\nPlease Search Again</string>
+    <string name="no_results_textview">No Such Artist Found.\n Please Search Again.</string>
+    <string name="title_activity_artist_track">Top 10 Tracks</string>
+
+    <string name="pref_country_preference_key">country</string>
+    <string name="pref_country_preference_default">US</string>
+
+    <string name="track_action_bar_subtitle">Hey</string>
 
 </resources>
