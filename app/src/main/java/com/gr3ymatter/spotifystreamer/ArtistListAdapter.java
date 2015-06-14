@@ -29,6 +29,8 @@ public class ArtistListAdapter extends ArrayAdapter<Artist> {
         mContext = context;
     }
 
+
+    //Instead of doing it this way, should i be using Volley? NetworkImageView's etc?
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
 

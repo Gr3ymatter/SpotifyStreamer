@@ -12,10 +12,26 @@
         android:id="@+id/editText_search"
         android:hint="@string/artist_search_hint"/>
 
-    <ListView
+    <ViewSwitcher
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/listview_artist"
-        ></ListView>
+        android:id="@+id/viewswitcher">
+
+        <ListView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/listview_artist"
+            ></ListView>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/no_results_textview"
+            />
+
+    </ViewSwitcher>
+
+
 
 </LinearLayout>

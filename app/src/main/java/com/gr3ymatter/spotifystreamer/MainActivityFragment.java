@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.ViewSwitcher;
 
 import java.util.List;
 
@@ -27,6 +28,7 @@ public class MainActivityFragment extends Fragment {
 
     EditText mSearchEditText;
     ListView mArtistListView;
+    ViewSwitcher mViewSwitcher;
 
     static SpotifyApi mspotifyApi;
 
@@ -45,7 +47,7 @@ public class MainActivityFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
         artistAdapter = new ArtistListAdapter(getActivity(), R.layout.list_item_artist);
-
+        mViewSwitcher = (ViewSwitcher)rootView.findViewById(R.id.viewswitcher);
         mSearchEditText = (EditText)rootView.findViewById(R.id.editText_search);
         mArtistListView = (ListView)rootView.findViewById(R.id.listview_artist);
         mArtistListView.setAdapter(artistAdapter);
@@ -115,16 +117,19 @@ public class MainActivityFragment extends Fragment {
         protected void onPostExecute(List aString) {
             super.onPostExecute(aString);
 
-            if(artistList == null){
+            if(artistList == null || artistList.size() == 0){
                 //Do something here... show that there are no results
+                if(mViewSwitcher.getCurrentView().equals(mArtistListView))
+                    mViewSwitcher.showNext();
             }
             else
             {
+                if(!mViewSwitcher.getCurrentView().equals(mArtistListView))
+                    mViewSwitcher.showNext();;
                 artistAdapter.clear();
                 artistAdapter.addAll(artistList);
                 artistAdapter.setNotifyOnChange(true);
             }
-
         }
     }
 
