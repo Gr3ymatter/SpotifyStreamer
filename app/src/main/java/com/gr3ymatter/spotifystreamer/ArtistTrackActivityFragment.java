@@ -25,6 +25,7 @@ public class ArtistTrackActivityFragment extends Fragment {
 
     ArtistTrackAdapter mArtistTrackAdapter;
     ListView mArtistTrackListView;
+    String artistID;
 
     public ArtistTrackActivityFragment() {
     }
@@ -33,7 +34,7 @@ public class ArtistTrackActivityFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_artist_track, container, false);
-        String artistID = getActivity().getIntent().getStringExtra(MainActivityFragment.ARTIST_ID);
+        artistID = getActivity().getIntent().getStringExtra(MainActivityFragment.ARTIST_ID);
 
 
         mArtistTrackListView = (ListView)rootView.findViewById(R.id.listview_artist_track);
@@ -48,6 +49,11 @@ public class ArtistTrackActivityFragment extends Fragment {
 
 
         return rootView;
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
     }
 
 
@@ -68,6 +74,8 @@ public class ArtistTrackActivityFragment extends Fragment {
             return tracks.tracks;
 
         }
+
+
 
         @Override
         protected void onPostExecute(List<Track> tracks) {

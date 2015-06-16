@@ -35,6 +35,7 @@ public class MainActivityFragment extends Fragment {
     static ArrayAdapter<Artist> artistAdapter;
     public static final String ARTIST_ID = "artist_id";
     public static final String ARTIST_NAME = "artist_name";
+    private static final String EDITTEXT_VALUE = "edittext_value";
 
     static SpotifyApi mspotifyApi;
 
@@ -44,13 +45,22 @@ public class MainActivityFragment extends Fragment {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+
+        Log.d(MainActivityFragment.class.getSimpleName(), "onResume()");
+
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
         artistAdapter = new ArtistListAdapter(getActivity(), R.layout.list_item_artist);
         mViewSwitcher = (ViewSwitcher)rootView.findViewById(R.id.viewswitcher);
-        mSearchEditText = (EditText)rootView.findViewById(R.id.editText_search);
+        if(mSearchEditText == null)
+            mSearchEditText = (EditText)rootView.findViewById(R.id.editText_search);
         mArtistListView = (ListView)rootView.findViewById(R.id.listview_artist);
         mArtistListView.setAdapter(artistAdapter);
 
@@ -80,6 +90,17 @@ public class MainActivityFragment extends Fragment {
         });
 
 
+
+        //This is workaround for saving state. The Spotify library does not implement Parceble or Serializable
+        //thus i cannot save the Artist Arrays. Instead i choose to save the text value and redo the search
+        //everytime the orientation is changed. One drawback to this approach is that the list clears if the
+        //EditText view has no string.
+        if(savedInstanceState != null){
+            mSearchEditText.setText(savedInstanceState.getString(EDITTEXT_VALUE));
+            if(!mSearchEditText.getText().toString().equals(""))
+                refreshSearch(mSearchEditText.getText().toString());
+        }
+
         mArtistListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -91,6 +112,8 @@ public class MainActivityFragment extends Fragment {
                 startActivity(idIntent);
             }
         });
+
+        Log.d(MainActivityFragment.class.getSimpleName(), "OnCreateView()");
         return rootView;
     }
 
@@ -110,11 +133,56 @@ public class MainActivityFragment extends Fragment {
 
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString(EDITTEXT_VALUE, mSearchEditText.getText().toString());
+        Log.d(MainActivityFragment.class.getSimpleName(), "onSaveInstanceState()");
 
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        Log.d(MainActivityFragment.class.getSimpleName(), "onDestroy()");
+
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        Log.d(MainActivityFragment.class.getSimpleName(), "onStart()");
+
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        Log.d(MainActivityFragment.class.getSimpleName(), "onStop()");
+
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Log.d(MainActivityFragment.class.getSimpleName(), "onCreate()");
+
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        Bundle bundle = new Bundle();
+     //   this.onSaveInstanceState(bundle);
+        Log.d(MainActivityFragment.class.getSimpleName(), "onPause()");
+
+    }
 
     private class  FetchArtistData extends AsyncTask<String, Void, List>{
 
         List<Artist> artistList;
+
 
         private final String FETCHARTIST_TAG = FetchArtistData.class.getSimpleName();
 
