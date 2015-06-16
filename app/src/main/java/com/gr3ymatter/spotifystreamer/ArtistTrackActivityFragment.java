@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.ViewSwitcher;
 
 import java.util.HashMap;
 import java.util.List;
@@ -26,6 +27,7 @@ public class ArtistTrackActivityFragment extends Fragment {
     ArtistTrackAdapter mArtistTrackAdapter;
     ListView mArtistTrackListView;
     String artistID;
+    ViewSwitcher mViewSwitcher;
 
     public ArtistTrackActivityFragment() {
     }
@@ -35,6 +37,8 @@ public class ArtistTrackActivityFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_artist_track, container, false);
         artistID = getActivity().getIntent().getStringExtra(MainActivityFragment.ARTIST_ID);
+
+        mViewSwitcher = (ViewSwitcher)rootView.findViewById(R.id.viewswitcher);
 
 
         mArtistTrackListView = (ListView)rootView.findViewById(R.id.listview_artist_track);
@@ -80,7 +84,21 @@ public class ArtistTrackActivityFragment extends Fragment {
         @Override
         protected void onPostExecute(List<Track> tracks) {
 
-            mArtistTrackAdapter.addAll(tracks);
+            if(tracks == null || tracks.size() == 0){
+                //Do something here... show that there are no results
+                if(mViewSwitcher.getCurrentView().equals(mArtistTrackListView))
+                    mViewSwitcher.showNext();
+            }
+            else
+            {
+                //If the current view is not the ArtistListView then display the ArtistListView
+                //as we have artists to display
+                if(!mViewSwitcher.getCurrentView().equals(mArtistTrackListView))
+                    mViewSwitcher.showNext();;
+                mArtistTrackAdapter.addAll(tracks);
+                mArtistTrackAdapter.setNotifyOnChange(true);
+            }
+
         }
     }
 
