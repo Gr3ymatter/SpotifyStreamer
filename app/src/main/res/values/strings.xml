@@ -9,5 +9,6 @@
 
     <string name="pref_country_preference_key">country</string>
     <string name="pref_country_preference_default">US</string>
+    <string name="pref_location_settings_display_name">Location Settings</string>
 
 </resources>

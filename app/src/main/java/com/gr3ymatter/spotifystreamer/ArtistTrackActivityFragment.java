@@ -1,7 +1,9 @@
 package com.gr3ymatter.spotifystreamer;
 
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -28,7 +30,7 @@ public class ArtistTrackActivityFragment extends Fragment {
     ListView mArtistTrackListView;
     String artistID;
     ViewSwitcher mViewSwitcher;
-
+    SharedPreferences pref;
     public ArtistTrackActivityFragment() {
     }
 
@@ -46,12 +48,10 @@ public class ArtistTrackActivityFragment extends Fragment {
 
         mArtistTrackListView.setAdapter(mArtistTrackAdapter);
 
-
+        pref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        String location = pref.getString(getString(R.string.pref_country_preference_key),getString(R.string.pref_country_preference_default));
         Log.d("ARTIST_ID", artistID);
-        new FetchTrackData().execute(artistID);
-
-
-
+        new FetchTrackData().execute(artistID, location);
         return rootView;
     }
 
@@ -70,7 +70,7 @@ public class ArtistTrackActivityFragment extends Fragment {
             HashMap<String, Object> locationQuery;
             locationQuery = new HashMap<String, Object>();
 
-            locationQuery.put("country","US");
+            locationQuery.put("country", params[1]);
 
             Tracks tracks = spotifyService.getArtistTopTrack(params[0],locationQuery);
 

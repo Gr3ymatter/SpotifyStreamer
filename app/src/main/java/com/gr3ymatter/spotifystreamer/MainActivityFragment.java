@@ -44,13 +44,8 @@ public class MainActivityFragment extends Fragment {
     public MainActivityFragment() {
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
 
-        Log.d(MainActivityFragment.class.getSimpleName(), "onResume()");
 
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -141,44 +136,6 @@ public class MainActivityFragment extends Fragment {
 
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-
-        Log.d(MainActivityFragment.class.getSimpleName(), "onDestroy()");
-
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        Log.d(MainActivityFragment.class.getSimpleName(), "onStart()");
-
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        Log.d(MainActivityFragment.class.getSimpleName(), "onStop()");
-
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        Log.d(MainActivityFragment.class.getSimpleName(), "onCreate()");
-
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        Bundle bundle = new Bundle();
-     //   this.onSaveInstanceState(bundle);
-        Log.d(MainActivityFragment.class.getSimpleName(), "onPause()");
-
-    }
-
     private class  FetchArtistData extends AsyncTask<String, Void, List>{
 
         List<Artist> artistList;
@@ -191,6 +148,7 @@ public class MainActivityFragment extends Fragment {
         protected List doInBackground(String... params) {
             mspotifyApi = new SpotifyApi();
             SpotifyService spotify = mspotifyApi.getService();
+
             artistList = spotify.searchArtists(params[0]).artists.items;
 
             return artistList;
