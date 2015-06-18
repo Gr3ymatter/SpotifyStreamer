@@ -1,6 +1,6 @@
 package com.gr3ymatter.spotifystreamer;
 
-import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.media.Ringtone;
@@ -8,6 +8,7 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
@@ -16,6 +17,7 @@ import android.preference.PreferenceManager;
 import android.preference.RingtonePreference;
 import android.text.TextUtils;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -37,7 +39,44 @@ public class SettingsActivity extends PreferenceActivity {
      * shown on tablets.
      */
     private static final boolean ALWAYS_SIMPLE_PREFS = false;
+    private static Activity mContext;
 
+    Preference.OnPreferenceChangeListener validationListener = new Preference.OnPreferenceChangeListener() {
+        @Override
+        public boolean onPreferenceChange(Preference preference, Object newValue) {
+            String value = newValue.toString();
+
+            boolean rtnval = true;
+
+            if(preference instanceof EditTextPreference)
+            {
+                String[] locationArray = new String[]{"ar","at","au","be","bg","ch","cl","co","cr",
+                        "cz","de","dk","ec","ee","es","fi","fr","gb","gr","gt","hk","hu","ie","is",
+                        "it","li","lt","lu","lv","mx","my","nl","no","nz","pe","pl","pt","se","sg",
+                        "sk","sv","tr","tw","us","uy","global"};
+
+                if(!containsCaseInsensitive(value, Arrays.asList(locationArray)))
+                {
+                    final android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(mContext);
+                    builder.setTitle("Invalid Input");
+                    builder.setMessage("Please Enter Correct Country Code");
+                    builder.setPositiveButton(android.R.string.ok, null);
+                    builder.show();
+                    rtnval = false;
+                }
+            }
+            return rtnval;
+        }
+    };
+
+    static public boolean containsCaseInsensitive(String s, List<String> l){
+        for (String string : l){
+            if (string.equalsIgnoreCase(s)){
+                return true;
+            }
+        }
+        return false;
+    }
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
@@ -55,6 +94,7 @@ public class SettingsActivity extends PreferenceActivity {
         if (!isSimplePreferences(this)) {
             return;
         }
+        mContext = this;
 
         // In the simplified UI, fragments are not used at all and we instead
         // use the older PreferenceActivity APIs.
@@ -65,7 +105,8 @@ public class SettingsActivity extends PreferenceActivity {
         // Bind the summaries of EditText/List/Dialog/Ringtone preferences to
         // their values. When their values change, their summaries are updated
         // to reflect the new value, per the Android Design guidelines.
-       // bindPreferenceSummaryToValue(findPreference("example_text"));
+        bindAndValidate(findPreference(getString(R.string.pref_country_preference_key)));
+
     }
 
     /**
@@ -99,21 +140,10 @@ public class SettingsActivity extends PreferenceActivity {
     }
 
     /**
-     * {@inheritDoc}
-     */
-    @Override
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    public void onBuildHeaders(List<Header> target) {
-        if (!isSimplePreferences(this)) {
-            loadHeadersFromResource(R.xml.pref_headers, target);
-        }
-    }
-
-    /**
      * A preference value change listener that updates the preference's summary
-     * to reflect its new value.
+     * to reflect its new value and validates the input.
      */
-    private static Preference.OnPreferenceChangeListener sBindPreferenceSummaryToValueListener = new Preference.OnPreferenceChangeListener() {
+    private static Preference.OnPreferenceChangeListener sBindAndValidate = new Preference.OnPreferenceChangeListener() {
         @Override
         public boolean onPreferenceChange(Preference preference, Object value) {
             String stringValue = value.toString();
@@ -155,7 +185,28 @@ public class SettingsActivity extends PreferenceActivity {
             } else {
                 // For all other preferences, set the summary to the value's
                 // simple string representation.
-                preference.setSummary(stringValue);
+
+                // We also validate the information. if it is incorrect we return false
+                // If it is correct we return true
+
+                if(preference instanceof EditTextPreference)
+                {
+                    String[] locationArray = new String[]{"ar","at","au","be","bg","ch","cl","co","cr",
+                            "cz","de","dk","ec","ee","es","fi","fr","gb","gr","gt","hk","hu","ie","is",
+                            "it","li","lt","lu","lv","mx","my","nl","no","nz","pe","pl","pt","se","sg",
+                            "sk","sv","tr","tw","us","uy","global"};
+
+                    if(!containsCaseInsensitive(stringValue, Arrays.asList(locationArray)))
+                    {
+                        final android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(mContext);
+                        builder.setTitle("Invalid Input");
+                        builder.setMessage("Please Enter Correct Country Code");
+                        builder.setPositiveButton(android.R.string.ok, null);
+                        builder.show();
+                        return false;
+                    }
+                }
+                preference.setSummary(stringValue.toUpperCase());
             }
             return true;
         }
@@ -168,38 +219,18 @@ public class SettingsActivity extends PreferenceActivity {
      * immediately updated upon calling this method. The exact display format is
      * dependent on the type of preference.
      *
-     * @see #sBindPreferenceSummaryToValueListener
+     * @see #sBindAndValidate
      */
-    private static void bindPreferenceSummaryToValue(Preference preference) {
+    private static void bindAndValidate(Preference preference) {
         // Set the listener to watch for value changes.
-        preference.setOnPreferenceChangeListener(sBindPreferenceSummaryToValueListener);
+        preference.setOnPreferenceChangeListener(sBindAndValidate);
 
         // Trigger the listener immediately with the preference's
         // current value.
-        sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
+        sBindAndValidate.onPreferenceChange(preference,
                 PreferenceManager
                         .getDefaultSharedPreferences(preference.getContext())
                         .getString(preference.getKey(), ""));
-    }
-
-    /**
-     * This fragment shows general preferences only. It is used when the
-     * activity is showing a two-pane settings UI.
-     */
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    public static class GeneralPreferenceFragment extends PreferenceFragment {
-        @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            addPreferencesFromResource(R.xml.pref_general);
-
-            // Bind the summaries of EditText/List/Dialog/Ringtone preferences
-            // to their values. When their values change, their summaries are
-            // updated to reflect the new value, per the Android Design
-            // guidelines.
-            bindPreferenceSummaryToValue(findPreference("example_text"));
-            bindPreferenceSummaryToValue(findPreference("example_list"));
-        }
     }
 
 
