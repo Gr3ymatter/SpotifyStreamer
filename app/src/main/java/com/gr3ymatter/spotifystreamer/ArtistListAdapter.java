@@ -17,6 +17,7 @@ import data.CustomArtist;
  */
 public class ArtistListAdapter extends ArrayAdapter<CustomArtist> {
 
+    //Using ViewHolder Pattern
     static class ViewHolder{
         ImageView artistImage;
         TextView artistName;

@@ -40,14 +40,15 @@ public class MainActivityFragment extends Fragment {
     AsyncTask fetchArtistData;
     ArrayList<CustomArtist> customArtists;
     static ArrayAdapter<CustomArtist> artistAdapter;
+    static SpotifyApi mspotifyApi;
+    long lastTimeTyped;
+
+    //String Keys
     public static final String ARTIST_ID = "artist_id";
     public static final String ARTIST_NAME = "artist_name";
-    private static final String EDITTEXT_VALUE = "edittext_value";
     private static final String CUSTOM_ARTIST_TAG = "customartist";
+    private String errorString;
 
-    static SpotifyApi mspotifyApi;
-
-    long lastTimeTyped;
 
     public MainActivityFragment() {
     }
@@ -60,13 +61,14 @@ public class MainActivityFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
+        //Get Reference to Global Variables
         artistAdapter = new ArtistListAdapter(getActivity(), R.layout.list_item_artist);
         mViewSwitcher = (ViewSwitcher)rootView.findViewById(R.id.viewswitcher);
         if(mSearchEditText == null)
             mSearchEditText = (EditText)rootView.findViewById(R.id.editText_search);
         mArtistListView = (ListView)rootView.findViewById(R.id.listview_artist);
-        mArtistListView.setAdapter(artistAdapter);
 
+        mArtistListView.setAdapter(artistAdapter);
         lastTimeTyped = System.currentTimeMillis();
 
         mSearchEditText.addTextChangedListener(new TextWatcher() {
@@ -97,6 +99,8 @@ public class MainActivityFragment extends Fragment {
         //thus i cannot save the Artist Arrays. Instead i choose to save the text value and redo the search
         //everytime the orientation is changed. One drawback to this approach is that the list clears if the
         //EditText view has no string.
+        //EDIT: I choose to create a custom wrapper in the end as technically i wasnt storing the data locally except
+        //for the EditTextView String.
         if(savedInstanceState != null){
             artistAdapter.clear();
             customArtists = savedInstanceState.getParcelableArrayList(CUSTOM_ARTIST_TAG);
@@ -120,8 +124,6 @@ public class MainActivityFragment extends Fragment {
     }
 
 
-    //This method cancels my old search. However the way i am doing it is questionable.
-    //Am i creating a memoryleak by losing reference to the old AsyncTask??
     private void refreshSearch(String name){
 
         mspotifyApi = new SpotifyApi();
@@ -163,12 +165,19 @@ public class MainActivityFragment extends Fragment {
             @Override
             public void failure(RetrofitError error) {
 
+                errorString = error.getResponse().getReason();
+
+                final android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(getActivity());
+                builder.setTitle("Invalid Input");
+                builder.setMessage(errorString);
+                builder.setPositiveButton(android.R.string.ok, null);
+                builder.show();
+
             }
         });
 
 
     }
-
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
