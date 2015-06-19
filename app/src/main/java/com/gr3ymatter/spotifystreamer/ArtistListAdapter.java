@@ -10,12 +10,12 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
-import kaaes.spotify.webapi.android.models.Artist;
+import data.CustomArtist;
 
 /**
  * Created by Afzal on 6/13/15.
  */
-public class ArtistListAdapter extends ArrayAdapter<Artist> {
+public class ArtistListAdapter extends ArrayAdapter<CustomArtist> {
 
     static class ViewHolder{
         ImageView artistImage;
@@ -48,10 +48,10 @@ public class ArtistListAdapter extends ArrayAdapter<Artist> {
         }
 
         ViewHolder holder = (ViewHolder) rowView.getTag();
-        holder.artistName.setText(this.getItem(position).name);
+        holder.artistName.setText(this.getItem(position).mArtistName);
 
-        if(getItem(position).images.size() != 0)
-            Picasso.with(mContext).load(getItem(position).images.get(getItem(position).images.size() - 1).url).into(holder.artistImage);
+         if(getItem(position).mArtistImage != null)
+            Picasso.with(mContext).load(getItem(position).mArtistImage).into(holder.artistImage);
         return rowView;
     }
 }

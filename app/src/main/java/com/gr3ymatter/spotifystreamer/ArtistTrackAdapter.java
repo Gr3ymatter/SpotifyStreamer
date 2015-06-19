@@ -10,12 +10,12 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
-import kaaes.spotify.webapi.android.models.Track;
+import data.CustomTrack;
 
 /**
  * Created by Afzal on 6/13/15.
  */
-public class ArtistTrackAdapter extends ArrayAdapter<Track> {
+public class ArtistTrackAdapter extends ArrayAdapter<CustomTrack> {
 
 
     Activity mContext;
@@ -54,14 +54,14 @@ public class ArtistTrackAdapter extends ArrayAdapter<Track> {
         }
 
         ViewHolder holder = (ViewHolder)rowView.getTag();
-        if(getItem(position).album.images.size() != 0)
+        if(getItem(position).mAlbumImage != null)
         {
-            String albumArtUrl = getItem(position).album.images.get(getItem(position).album.images.size()-1).url;
+            String albumArtUrl = getItem(position).mAlbumImage;
             Picasso.with(mContext).load(albumArtUrl).into(holder.albumArt);
         }
 
-        holder.trackName.setText(getItem(position).name);
-        holder.albumName.setText(getItem(position).album.name);
+        holder.trackName.setText(getItem(position).mSongName);
+        holder.albumName.setText(getItem(position).mAlbumName);
 
         return rowView;
     }

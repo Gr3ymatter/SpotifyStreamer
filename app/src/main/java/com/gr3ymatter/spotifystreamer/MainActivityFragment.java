@@ -16,11 +16,17 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.ViewSwitcher;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import data.CustomArtist;
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Artist;
+import kaaes.spotify.webapi.android.models.ArtistsPager;
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 
 
 /**
@@ -32,10 +38,12 @@ public class MainActivityFragment extends Fragment {
     ListView mArtistListView;
     ViewSwitcher mViewSwitcher;
     AsyncTask fetchArtistData;
-    static ArrayAdapter<Artist> artistAdapter;
+    ArrayList<CustomArtist> customArtists;
+    static ArrayAdapter<CustomArtist> artistAdapter;
     public static final String ARTIST_ID = "artist_id";
     public static final String ARTIST_NAME = "artist_name";
     private static final String EDITTEXT_VALUE = "edittext_value";
+    private static final String CUSTOM_ARTIST_TAG = "customartist";
 
     static SpotifyApi mspotifyApi;
 
@@ -85,22 +93,21 @@ public class MainActivityFragment extends Fragment {
         });
 
 
-
         //This is workaround for saving state. The Spotify library does not implement Parceble or Serializable
         //thus i cannot save the Artist Arrays. Instead i choose to save the text value and redo the search
         //everytime the orientation is changed. One drawback to this approach is that the list clears if the
         //EditText view has no string.
         if(savedInstanceState != null){
-            mSearchEditText.setText(savedInstanceState.getString(EDITTEXT_VALUE));
-            if(!mSearchEditText.getText().toString().equals(""))
-                refreshSearch(mSearchEditText.getText().toString());
+            artistAdapter.clear();
+            customArtists = savedInstanceState.getParcelableArrayList(CUSTOM_ARTIST_TAG);
+            artistAdapter.addAll(customArtists);
         }
 
         mArtistListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String artistId = ((Artist)parent.getItemAtPosition(position)).id;
-                String artistName = ((Artist)parent.getItemAtPosition(position)).name;
+                String artistId = ((CustomArtist)parent.getItemAtPosition(position)).mArtistID;
+                String artistName = ((CustomArtist)parent.getItemAtPosition(position)).mArtistName;
                 Intent idIntent = new Intent(getActivity(), ArtistTrackActivity.class);
                 idIntent.putExtra(ARTIST_ID, artistId);
                 idIntent.putExtra(ARTIST_NAME, artistName);
@@ -117,64 +124,57 @@ public class MainActivityFragment extends Fragment {
     //Am i creating a memoryleak by losing reference to the old AsyncTask??
     private void refreshSearch(String name){
 
-        if(fetchArtistData == null){
-            fetchArtistData = new FetchArtistData().execute(name);
-        }
-        else
-        {
-            fetchArtistData.cancel(true);
-            fetchArtistData = new FetchArtistData().execute(name);
-        }
+        mspotifyApi = new SpotifyApi();
+        SpotifyService spotifyService = mspotifyApi.getService();
+        spotifyService.searchArtists(name, new Callback<ArtistsPager>() {
+            @Override
+            public void success(ArtistsPager artistsPager, Response response) {
+               List<Artist> artistList =  artistsPager.artists.items;
+               customArtists = new ArrayList<CustomArtist>();
+                for(Artist artist: artistList){
+                    customArtists.add(new CustomArtist(artist));
+                }
+
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if(customArtists == null || customArtists.size() == 0){
+                            //Do something here... show that there are no results
+                            if(mViewSwitcher.getCurrentView().equals(mArtistListView))
+                                mViewSwitcher.showNext();
+                        }
+                        else
+                        {
+                            //If the current view is not the ArtistListView then display the ArtistListView
+                            //as we have artists to display
+                            if(!mViewSwitcher.getCurrentView().equals(mArtistListView))
+                                mViewSwitcher.showNext();;
+                            artistAdapter.clear();                      //Clear the list
+
+                            artistAdapter.addAll(customArtists);           //Add Artists together. Its better to add them all together than one by one
+                            artistAdapter.setNotifyOnChange(true);
+                        }
+                    }
+                });
+
+
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+
+            }
+        });
+
 
     }
+
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putString(EDITTEXT_VALUE, mSearchEditText.getText().toString());
-        Log.d(MainActivityFragment.class.getSimpleName(), "onSaveInstanceState()");
+        outState.putParcelableArrayList(CUSTOM_ARTIST_TAG, customArtists);
 
     }
-
-    private class  FetchArtistData extends AsyncTask<String, Void, List>{
-
-        List<Artist> artistList;
-
-
-        private final String FETCHARTIST_TAG = FetchArtistData.class.getSimpleName();
-
-
-        @Override
-        protected List doInBackground(String... params) {
-            mspotifyApi = new SpotifyApi();
-            SpotifyService spotify = mspotifyApi.getService();
-
-            artistList = spotify.searchArtists(params[0]).artists.items;
-
-            return artistList;
-        }
-
-        @Override
-        protected void onPostExecute(List aString) {
-            super.onPostExecute(aString);
-
-            if(artistList == null || artistList.size() == 0){
-                //Do something here... show that there are no results
-                if(mViewSwitcher.getCurrentView().equals(mArtistListView))
-                    mViewSwitcher.showNext();
-            }
-            else
-            {
-                //If the current view is not the ArtistListView then display the ArtistListView
-                //as we have artists to display
-                if(!mViewSwitcher.getCurrentView().equals(mArtistListView))
-                    mViewSwitcher.showNext();;
-                artistAdapter.clear();                      //Clear the list
-                artistAdapter.addAll(artistList);           //Add Artists together. Its better to add them all together than one by one
-                artistAdapter.setNotifyOnChange(true);
-            }
-        }
-    }
-
 
 }
