@@ -139,6 +139,10 @@ public class ArtistTrackActivityFragment extends Fragment {
                         builder.setPositiveButton(android.R.string.ok, null);
                         builder.show();
 
+
+
+                        
+
                     }
                 });
 
