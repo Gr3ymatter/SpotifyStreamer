@@ -54,9 +54,10 @@ public class ArtistTrackAdapter extends ArrayAdapter<CustomTrack> {
         }
 
         ViewHolder holder = (ViewHolder)rowView.getTag();
-        if(getItem(position).mAlbumImage != null)
+        if(getItem(position).mAlbumImage_small != null)
         {
-            String albumArtUrl = getItem(position).mAlbumImage;
+
+            String albumArtUrl = getItem(position).mAlbumImage_small;
             Picasso.with(mContext).load(albumArtUrl).into(holder.albumArt);
         }
 

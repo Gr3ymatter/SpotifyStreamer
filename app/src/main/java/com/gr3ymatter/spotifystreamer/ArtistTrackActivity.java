@@ -2,6 +2,7 @@ package com.gr3ymatter.spotifystreamer;
 
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -13,6 +14,7 @@ public class ArtistTrackActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_artist_track);
         getSupportActionBar().setSubtitle(getIntent().getStringExtra(MainActivityFragment.ARTIST_NAME));
+        getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, new ArtistTrackActivityFragment()).commit();
     }
 
 
@@ -33,7 +35,14 @@ public class ArtistTrackActivity extends ActionBarActivity {
 //        //noinspection SimplifiableIfStatement
 //        if (id == R.id.action_settings) {
 //        }
-//
+
+        switch(item.getItemId()){
+            case android.R.id.home:
+                Log.d("PLAYER DIALOG", "Back Button Pressed");
+                onBackPressed();
+                return true;
+        }
         return super.onOptionsItemSelected(item);
+//
     }
 }
