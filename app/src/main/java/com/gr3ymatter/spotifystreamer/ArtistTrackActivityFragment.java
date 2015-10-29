@@ -75,8 +75,15 @@ public class ArtistTrackActivityFragment extends Fragment {
         //Set Adapter
         mArtistTrackListView.setAdapter(mArtistTrackAdapter);
 
+        Bundle args = getArguments();
+
+
+        if(args != null){
+            artistID = args.getString(MainActivityFragment.ARTIST_ID);
+        }
+        else
+            return null;
         //Getting Query Parameters from Intent and Shared Preferences
-        artistID = getActivity().getIntent().getStringExtra(MainActivityFragment.ARTIST_ID);
         pref = PreferenceManager.getDefaultSharedPreferences(getActivity());
         location = pref.getString(getString(R.string.pref_country_preference_key), getString(R.string.pref_country_preference_default));
 
@@ -129,7 +136,7 @@ public class ArtistTrackActivityFragment extends Fragment {
         FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
         playerFragment = new PlayerDialog().newInstance(position, customTracks);
 
-        if (mIsLargeLayout) {
+        if (MainActivity.mTwoPane) {
             // The device is using a large layout, so show the fragment as a dialog
             playerFragment.show(fragmentManager, "dialog");
         } else {
@@ -140,7 +147,7 @@ public class ArtistTrackActivityFragment extends Fragment {
             transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
             // To make it fullscreen, use the 'content' root view as the container
             // for the fragment, which is always the root view for the activity
-            transaction.replace(R.id.fragment_container, playerFragment)
+            transaction.replace(R.id.artist_track_container, playerFragment)
                     .addToBackStack(null).commit();
         }
     }

@@ -1,7 +1,7 @@
 package com.gr3ymatter.spotifystreamer;
 
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -13,8 +13,18 @@ public class ArtistTrackActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_artist_track);
-        getSupportActionBar().setSubtitle(getIntent().getStringExtra(MainActivityFragment.ARTIST_NAME));
-        getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, new ArtistTrackActivityFragment()).commit();
+        if(savedInstanceState == null){
+
+            Bundle args = new Bundle();
+            args.putString(MainActivityFragment.ARTIST_ID, getIntent().getStringExtra(MainActivityFragment.ARTIST_ID));
+            args.putString(MainActivityFragment.ARTIST_NAME, getIntent().getStringExtra(MainActivityFragment.ARTIST_NAME));
+
+            ArtistTrackActivityFragment fragment = new ArtistTrackActivityFragment();
+            fragment.setArguments(args);
+            getSupportActionBar().setSubtitle(getIntent().getStringExtra(MainActivityFragment.ARTIST_NAME));
+            getSupportFragmentManager().beginTransaction().add(R.id.artist_track_container, fragment, MainActivity.ARTISTTRACK_TAG).commit();
+        }
+
     }
 
 

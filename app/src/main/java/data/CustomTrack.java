@@ -16,6 +16,7 @@ public class CustomTrack implements Parcelable, Serializable {
     public String mSongName;
     public String mArtistName;
     public String mAlbumImage_small;
+
     public String mAlbumImage_large;
     public String mTrackPreview;
 
@@ -25,7 +26,8 @@ public class CustomTrack implements Parcelable, Serializable {
         mSongName = track.name;
         mArtistName = track.artists.get(0).name;
         mTrackPreview = track.preview_url;
-        mAlbumImage_large = track.album.images.get(0).url;
+        mAlbumImage_large = track.album.images.get(1).url;
+
         mAlbumImage_small = track.album.images.get(track.album.images.size()-1).url;
     }
 

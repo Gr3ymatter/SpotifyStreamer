@@ -7,12 +7,52 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends ActionBarActivity implements MainActivityFragment.FragCallback{
+
+    public static Boolean mTwoPane = false;
+
+    static String ARTISTTRACK_TAG = "ARTISTTRACK";
+
+    @Override
+    public void onItemSelected(String ArtistID, String ArtistName) {
+        if(mTwoPane)
+        {
+            Bundle args = new Bundle();
+            args.putString(MainActivityFragment.ARTIST_ID, ArtistID);
+            args.putString(MainActivityFragment.ARTIST_NAME, ArtistName);
+
+            ArtistTrackActivityFragment fragment = new ArtistTrackActivityFragment();
+            fragment.setArguments(args);
+
+
+            getSupportFragmentManager().beginTransaction().replace(R.id.artist_track_container, fragment, ARTISTTRACK_TAG).commit();
+        }
+        else{
+
+            Intent activityIntent = new Intent(this, ArtistTrackActivity.class).putExtra(MainActivityFragment.ARTIST_ID, ArtistID);
+            activityIntent.putExtra(MainActivityFragment.ARTIST_NAME, ArtistName);
+            startActivity(activityIntent);
+
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        if(findViewById(R.id.artist_track_container) != null){
+
+            mTwoPane = true;
+
+            if(savedInstanceState == null){
+                getSupportFragmentManager().beginTransaction().replace(R.id.artist_track_container, new ArtistTrackActivityFragment(), ARTISTTRACK_TAG).commit();
+            }
+
+        } else {
+            mTwoPane = false;
+        }
+
     }
 
 

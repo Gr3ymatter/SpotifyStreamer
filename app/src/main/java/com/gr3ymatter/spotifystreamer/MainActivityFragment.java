@@ -1,6 +1,5 @@
 package com.gr3ymatter.spotifystreamer;
 
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -42,12 +41,18 @@ public class MainActivityFragment extends Fragment {
     static ArrayAdapter<CustomArtist> artistAdapter;
     static SpotifyApi mspotifyApi;
     long lastTimeTyped;
+    FragCallback mCallback;
+
 
     //String Keys
     public static final String ARTIST_ID = "artist_id";
     public static final String ARTIST_NAME = "artist_name";
     private static final String CUSTOM_ARTIST_TAG = "customartist";
     private String errorString;
+
+    public interface FragCallback{
+        public void onItemSelected(String ArtistID, String ArtistName);
+    }
 
 
     public MainActivityFragment() {
@@ -112,10 +117,8 @@ public class MainActivityFragment extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String artistId = ((CustomArtist)parent.getItemAtPosition(position)).mArtistID;
                 String artistName = ((CustomArtist)parent.getItemAtPosition(position)).mArtistName;
-                Intent idIntent = new Intent(getActivity(), ArtistTrackActivity.class);
-                idIntent.putExtra(ARTIST_ID, artistId);
-                idIntent.putExtra(ARTIST_NAME, artistName);
-                startActivity(idIntent);
+
+                ((FragCallback)getActivity()).onItemSelected(artistId, artistName);
             }
         });
 
