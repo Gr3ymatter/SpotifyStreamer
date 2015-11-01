@@ -32,10 +32,11 @@ public class PlayerDialog extends android.support.v4.app.DialogFragment {
    static String INDEX = "index";
     static String TRACKSLIST = "tracklist";
     static String CURRENTLOCATION = "tracklocation";
-
+    static String PLAYERSTATE = "state";
     ArrayList<CustomTrack> trackLists;
     int currentIndex;
     int currentLocation;
+    boolean prepared = false;
 
     SeekBar seekBar;
     Button playButton;
@@ -137,10 +138,10 @@ public class PlayerDialog extends android.support.v4.app.DialogFragment {
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 mHandler.removeCallbacks(audioPlayer);
-                int maxDuration = mediaPlayer.getDuration()/500;
+                int maxDuration = mediaPlayer.getDuration() / 500;
                 int currentDuration = seekBar.getProgress();
 
-                mediaPlayer.seekTo(currentDuration* 500);
+                mediaPlayer.seekTo(currentDuration * 500);
                 seekBar.setProgress(currentDuration);
                 mHandler.postDelayed(audioPlayer, 500);
             }
@@ -161,9 +162,9 @@ public class PlayerDialog extends android.support.v4.app.DialogFragment {
                 Toast.makeText(getActivity(), mediaPlayer.getDuration() + "", Toast.LENGTH_LONG);
 
                 mState = State.Playing;
-
+                prepared = true;
                 if (!mState.equals(State.Preparing) && !mState.equals(State.Retrieving)) {
-                    mediaPlayer.seekTo(currentLocation*500);
+                    mediaPlayer.seekTo(currentLocation * 500);
                     mediaPlayer.start();
                     seekBar.setMax(mediaPlayer.getDuration() / 500);
                     playButton.setBackgroundResource(android.R.drawable.ic_media_pause);
@@ -174,9 +175,15 @@ public class PlayerDialog extends android.support.v4.app.DialogFragment {
         });
 
 
-        mediaPlayer.prepareAsync();
-        mState = State.Preparing;
+        if(mState != State.Paused){
+            mediaPlayer.prepareAsync();
+            mState = State.Preparing;
+        }
+
+
         audioPlayer.run();
+
+
         playButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -193,10 +200,15 @@ public class PlayerDialog extends android.support.v4.app.DialogFragment {
                     return;
                 }
                 if (mState == State.Paused) {
-                    mediaPlayer.start();
-                    mState = State.Playing;
-                    playButton.setBackgroundResource(android.R.drawable.ic_media_pause);
-
+                    if(!prepared) {
+                        mediaPlayer.prepareAsync();
+                        mState = State.Preparing;
+                    }
+                    else {
+                        mediaPlayer.start();
+                        mState = State.Playing;
+                        playButton.setBackgroundResource(android.R.drawable.ic_media_pause);
+                    }
                 }
 
                 if (mState == State.Preparing || mState == State.Playing) {
@@ -214,6 +226,9 @@ public class PlayerDialog extends android.support.v4.app.DialogFragment {
 //                        }
 //                    });
                 }
+
+
+
 
             }
         });
@@ -431,6 +446,7 @@ public class PlayerDialog extends android.support.v4.app.DialogFragment {
         super.onSaveInstanceState(outState);
         outState.putInt(INDEX, currentIndex);
         outState.putInt(CURRENTLOCATION, currentLocation);
+        outState.putSerializable(PLAYERSTATE, mState);
     }
 
     @Override
@@ -441,6 +457,7 @@ public class PlayerDialog extends android.support.v4.app.DialogFragment {
         {
             currentIndex = savedInstanceState.getInt(INDEX);
             currentLocation = savedInstanceState.getInt(CURRENTLOCATION);
+            mState = (State)savedInstanceState.getSerializable(PLAYERSTATE);
         }
         else {
             currentIndex = getArguments().getInt(INDEX);
