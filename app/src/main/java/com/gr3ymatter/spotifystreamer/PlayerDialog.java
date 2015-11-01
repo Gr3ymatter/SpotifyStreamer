@@ -31,11 +31,11 @@ public class PlayerDialog extends android.support.v4.app.DialogFragment {
 
    static String INDEX = "index";
     static String TRACKSLIST = "tracklist";
-
+    static String CURRENTLOCATION = "tracklocation";
 
     ArrayList<CustomTrack> trackLists;
     int currentIndex;
-
+    int currentLocation;
 
     SeekBar seekBar;
     Button playButton;
@@ -47,6 +47,8 @@ public class PlayerDialog extends android.support.v4.app.DialogFragment {
     TextView songName_TextView;
     ImageView albumImage_ImageView;
     TextView artistName_TextView;
+
+
 
     private MediaPlayer mediaPlayer;
 
@@ -99,8 +101,8 @@ public class PlayerDialog extends android.support.v4.app.DialogFragment {
             @Override
             public void run() {
                 if (mState.equals(State.Playing) && mediaPlayer != null) {
-                    int currentPosition = mediaPlayer.getCurrentPosition() / 500;
-                    seekBar.setProgress(currentPosition);
+                    currentLocation = mediaPlayer.getCurrentPosition() / 500;
+                    seekBar.setProgress(currentLocation);
                     updateTimeTextViews(mediaPlayer.getCurrentPosition(), mediaPlayer.getDuration());
 
                 }
@@ -161,6 +163,7 @@ public class PlayerDialog extends android.support.v4.app.DialogFragment {
                 mState = State.Playing;
 
                 if (!mState.equals(State.Preparing) && !mState.equals(State.Retrieving)) {
+                    mediaPlayer.seekTo(currentLocation*500);
                     mediaPlayer.start();
                     seekBar.setMax(mediaPlayer.getDuration() / 500);
                     playButton.setBackgroundResource(android.R.drawable.ic_media_pause);
@@ -170,6 +173,10 @@ public class PlayerDialog extends android.support.v4.app.DialogFragment {
             }
         });
 
+
+        mediaPlayer.prepareAsync();
+        mState = State.Preparing;
+        audioPlayer.run();
         playButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -420,11 +427,24 @@ public class PlayerDialog extends android.support.v4.app.DialogFragment {
     }
 
     @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(INDEX, currentIndex);
+        outState.putInt(CURRENTLOCATION, currentLocation);
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-
-        currentIndex = getArguments().getInt(INDEX);
+        if(savedInstanceState != null)
+        {
+            currentIndex = savedInstanceState.getInt(INDEX);
+            currentLocation = savedInstanceState.getInt(CURRENTLOCATION);
+        }
+        else {
+            currentIndex = getArguments().getInt(INDEX);
+        }
         trackLists = getArguments().getParcelableArrayList(TRACKSLIST);
 
 
@@ -434,6 +454,7 @@ public class PlayerDialog extends android.support.v4.app.DialogFragment {
     {
         mHandler.removeCallbacks(audioPlayer);
         mediaPlayer.reset();
+        currentLocation = 0;
         mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
         try {
             mediaPlayer.setDataSource(trackLists.get(Index).mTrackPreview);

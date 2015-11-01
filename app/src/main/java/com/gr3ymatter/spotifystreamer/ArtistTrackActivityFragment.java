@@ -1,6 +1,5 @@
 package com.gr3ymatter.spotifystreamer;
 
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -92,19 +91,19 @@ public class ArtistTrackActivityFragment extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Log.d("PLAYERINTENT_TEST", "Clicked on artist top track number " + position);
 
-                Intent playerIntent = new Intent(getActivity(), PlayerActivity.class);
+                //Intent playerIntent = new Intent(getActivity(), PlayerActivity.class);
                 CustomTrack customTrack = customTracks.get(position);
                 String songName = customTrack.mSongName;
                 String albumName = customTrack.mAlbumName;
                 String albumArt = customTrack.mAlbumImage_large;
 
                 String albumPreview_URL = customTrack.mTrackPreview;
-
-                playerIntent.putExtra(ARTISTNAME_KEY, customTrack.mArtistName);
-                playerIntent.putExtra(SONGNAME_KEY, songName);
-                playerIntent.putExtra(ALBUMNAME_KEY, albumName);
-                playerIntent.putExtra(ALBUMIMAGE_KEY, albumArt);
-                playerIntent.putExtra(ALBNUMPREVIEW_URL_KEY, albumPreview_URL);
+//
+//                playerIntent.putExtra(ARTISTNAME_KEY, customTrack.mArtistName);
+//                playerIntent.putExtra(SONGNAME_KEY, songName);
+//                playerIntent.putExtra(ALBUMNAME_KEY, albumName);
+//                playerIntent.putExtra(ALBUMIMAGE_KEY, albumArt);
+//                playerIntent.putExtra(ALBNUMPREVIEW_URL_KEY, albumPreview_URL);
 
                // DialogFragment playerDialog = PlayerDialog.newInstance(position, customTracks);
 
@@ -124,10 +123,12 @@ public class ArtistTrackActivityFragment extends Fragment {
         //If there is previous data then get from savedInstanceState Bundle
         customTracks = savedInstanceState.getParcelableArrayList(TRACKLIST_KEY);
         mArtistTrackAdapter.clear();
+        if(customTracks == null) {
+            getTrackData(artistID, location);
+            return rootView;
+        }
         mArtistTrackAdapter.addAll(customTracks);
         mArtistTrackAdapter.setNotifyOnChange(true);        //Maybe Redundant
-
-
         return rootView;
     }
 
@@ -141,7 +142,6 @@ public class ArtistTrackActivityFragment extends Fragment {
             playerFragment.show(fragmentManager, "dialog");
         } else {
             // The device is smaller, so show the fragment fullscreen
-
             FragmentTransaction transaction = fragmentManager.beginTransaction();
             // For a little polish, specify a transition animation
             transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
